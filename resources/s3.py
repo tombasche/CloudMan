@@ -1,5 +1,5 @@
 from boto.s3.connection import S3Connection, S3ResponseError
-from flask_restful import Resource, reqparse
+from flask_restful import Resource
 from secrets import ACCESS_KEY, ACCESS_KEY_ID
 from resources.aws_regions import regions
 
@@ -28,25 +28,8 @@ def create_bucket(new_bucket_name, location):
     bucket_dict['details'].append({'location': bucket.get_location()})
     return bucket_dict
 
-def delete_bucket(bucket_name):
-    pass # TODO
-
 
 class S3(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument(
-        'bucket_name',
-        type=str,
-        required=True,
-        help="Bucket name cannot be empty"
-    )
-
-    parser.add_argument(
-        'location',
-        type=str,
-        required=True,
-        help="Location must be specified"
-    )
 
     def get(self, bucket_name, location):
 
