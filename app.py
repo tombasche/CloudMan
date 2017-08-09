@@ -2,11 +2,11 @@ from flask import Flask
 from flask_restful import Api
 from secrets import generate_flask_secret_key
 from resources.s3 import S3
-from resources.s3List import S3List
-from resources.ec2List import EC2List
-from resources.getEC2 import GetEC2
-from resources.createEC2 import CreateEC2
-from resources.stopEC2 import StopEC2
+from resources.s3_list import S3List
+from resources.ec2_list import EC2List
+from resources.get_ec2 import GetEC2
+from resources.create_ec2 import CreateEC2
+from resources.stop_ec2 import StopEC2
 
 from flask_jwt import JWT
 from security import authenticate, identity
