@@ -10,8 +10,8 @@ def stop_instance(location, data):
     instances = conn.get_only_instances(filters={"tag:config": data['config-type'], "instance-state-name": "running"})
     try:
         conn.stop_instances(instance_ids=[instance.id for instance in instances])
-    except EC2ResponseError:
-        return EC2ResponseError.error_message
+    except EC2ResponseError as err:
+        return err
     return 'Instances in {} config mode shutting down'.format(data['config-type'])
 
 

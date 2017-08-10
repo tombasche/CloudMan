@@ -25,8 +25,8 @@ def create_instance(data, location):
         return {"details": [{
             "instance_id": new_instance_id,
         }]}
-    except EC2ResponseError:
-        return EC2ResponseError.error_message
+    except EC2ResponseError as err:
+        return err
 
 
 class CreateEC2(Resource):

@@ -10,10 +10,10 @@ def get_instance(instance_id, location):
     instances = conn.get_only_instances(instance_ids=instance_id)
     for instance in instances:
         instance_dict['details'].append({'instance_id': instance.id,
-                                           'type': instance.instance_type,
-                                           'state': instance.state,
-                                           'public_dns_name': instance.public_dns_name,
-                                           'launch_time': instance.launch_time})
+                                         'type': instance.instance_type,
+                                         'state': instance.state,
+                                         'public_dns_name': instance.public_dns_name,
+                                         'launch_time': instance.launch_time})
 
     return instance_dict
 
