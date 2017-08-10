@@ -103,9 +103,9 @@ It might return something like the following:
 
 ### Retrieve single ec2 instance details
 
-The following endpoint will get you the details of a single instance for a specific config:
+The following endpoint will get you the details of a single instance:
 
-`<url>/ec2/<aws_region>/<config>`
+`<url>/ec2/<aws_region>/<instance_id>`
 
 It might return something like the following:
 
