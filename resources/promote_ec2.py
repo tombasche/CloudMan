@@ -30,6 +30,9 @@ def promote_instance(data: dict, region: str) -> dict:
         except EC2ResponseError:
             return {'message': 'Instance does not exist - have you double checked the region and id?'}
 
+    if len(instances) == 0:
+        return {'message': 'No instances for that config type exist - nothing to do'}
+
     try:
         for instance in instances:
             instance.remove_tag('config')

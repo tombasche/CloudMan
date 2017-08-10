@@ -47,7 +47,7 @@ A dev instance can be promoted to a test environment and a test environment to p
 As this is a post request it might look like so:
 ```json
 {
-    "config-type-from" : "dev"
+    "config-type" : "dev"
 }
 ```
 Any instances with this tag will now be promoted to a `test` environment. An `instance-id` parameter can also be specified in this request to only promote a single instance.
