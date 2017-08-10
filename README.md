@@ -78,3 +78,48 @@ The request might look like this (note you'll need the exact instance-id)
     "instance-id": "i-03c977a9cfda8d629"
 }
 ```
+
+### Retrieve ec2 instance ids for a specific config
+
+The following endpoint will get you the details of all instances for a specific config:
+
+`<url>/ec2/all/<aws_region>/<config>`
+
+It might return something like the following:
+
+```json
+{
+    "instances": [
+      {
+        "type": "t2.micro",
+        "instance_id": "i-03c977a9cfda8d629",
+        "launch_time": "2017-08-10T06:04:50.000Z",
+        "state": "stopped",
+        "public_dns_name": ""
+      }
+    ]
+}
+```
+
+### Retrieve single ec2 instance details
+
+The following endpoint will get you the details of a single instance for a specific config:
+
+`<url>/ec2/<aws_region>/<config>`
+
+It might return something like the following:
+
+```json
+{
+    "details": [
+        {
+            "type": "t2.micro",
+            "instance_id": "i-03c977a9cfda8d629",
+            "launch_time": "2017-08-10T06:04:50.000Z",
+            "state": "stopped",
+            "public_dns_name": ""
+        }
+    ],
+    "instance": "i-03c977a9cfda8d629"
+}
+```
