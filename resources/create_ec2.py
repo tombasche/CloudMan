@@ -1,4 +1,5 @@
 from boto.ec2 import connect_to_region
+from boto.ec2.connection import EC2ResponseError
 from flask_restful import Resource, reqparse
 from secrets import ACCESS_KEY, ACCESS_KEY_ID
 
@@ -10,18 +11,22 @@ def add_tags_to_instance(instance, tags):
 def create_instance(data, location):
 
     conn = connect_to_region(location, aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=ACCESS_KEY)
-    new_instance = conn.run_instances(data['ami-image-id'],
-                                      key_name=data['key-name'],
-                                      instance_type=data['instance-type'],
-                                      user_data=data['startup-script']
-                                      )
 
-    new_instance_id = str(new_instance.instances[0].id)
-    add_tags_to_instance(new_instance.instances[0], data['tags'])
+    try:
+        new_instance = conn.run_instances(data['ami-image-id'],
+                                          key_name=data['key-name'],
+                                          instance_type=data['instance-type'],
+                                          user_data=data['startup-script']
+                                          )
 
-    return {"details": [{
-        "instance_id": new_instance_id,
-    }]}
+        new_instance_id = str(new_instance.instances[0].id)
+        add_tags_to_instance(new_instance.instances[0], data['tags'])
+
+        return {"details": [{
+            "instance_id": new_instance_id,
+        }]}
+    except EC2ResponseError:
+        return EC2ResponseError.error_message
 
 
 class CreateEC2(Resource):
@@ -65,7 +70,4 @@ class CreateEC2(Resource):
     def post(self, location):
         data = CreateEC2.parser.parse_args()
         instance_details = create_instance(data, location)
-        if instance_details:
-            return {"instance": instance_details}
-
-        return {"message": "There was an error creating the ec2 instance"}, 200
+        return {"instance": instance_details}
