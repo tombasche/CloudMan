@@ -1,53 +1,69 @@
 from boto.s3.connection import S3Connection, S3ResponseError
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
+
 from secrets import ACCESS_KEY, ACCESS_KEY_ID
-from resources.aws_regions import regions
 
 
-def get_bucket(bucket_name, location):
+def get_bucket(bucket_name: str) -> dict:
+    """
+    Function to retrieve a bucket from S3 by name.S3 buckets can only be created globally using the
+    boto library.
+
+    :param bucket_name: The DNS-compliant name for the bucket to be retrieved.
+    :return: Details of the bucket being retrieved or an error message if it is not found.
+    """
+
     bucket_dict = {'bucket_name': bucket_name, 'contents': []}
     conn = S3Connection(ACCESS_KEY_ID, ACCESS_KEY)
 
     try:
-        bucket = conn.get_bucket(bucket_name, location=location)
+        bucket = conn.get_bucket(bucket_name)
     except S3ResponseError:
-        return None
+        return {'message': 'The bucket specified was not found.'}
 
     for key in bucket:
-        bucket_dict['contents'].append({'filename': key.key, 'location': location})
+        bucket_dict['contents'].append({'filename': key.key})
     return bucket_dict
 
 
-def create_bucket(new_bucket_name, location):
-    bucket_dict = {'bucket_name': new_bucket_name, 'details': [], 'contents': []}
+def create_bucket(data: dict) -> dict:
+    """
+    Function to create a new bucket on S3 in a specific location. S3 buckets can only be created globally using the
+    boto library.
+
+    :param data: The POST data containing the DNS-compliant name for the bucket to be created
+    :return: Details of the bucket being created or an error message if it is not.
+    """
+
+    bucket_dict = {'bucket_name': data['bucket_name'], 'details': [], 'contents': []}
     conn = S3Connection(ACCESS_KEY_ID, ACCESS_KEY)
     try:
-        bucket = conn.create_bucket(new_bucket_name, location=location)
-    except:
-        return None
-    bucket_dict['details'].append({'location': bucket.get_location()})
+        bucket = conn.create_bucket(data['bucket_name'])
+    except:  # really broad exception but it seems like the S3ConnectionError doesn't 'exist' when creating a bucket.
+        return {'message':
+                'There was an error creating the bucket - perhaps the name is already in use or not DNS compliant'}
     return bucket_dict
 
 
 class S3(Resource):
+    """A resource representing an S3 bucket."""
 
-    def get(self, bucket_name, location):
+    def get(self, bucket_name: str) -> dict:
+        """Return the details of a specific S3 bucket by name or an error if it couldn't be found."""
 
-        if location not in regions:
-            return {"message": location + " is not a valid region"}
+        return get_bucket(bucket_name)
 
-        bucket = get_bucket(bucket_name, location)
-        if bucket:
-            return bucket
-        return {"message": "No matching bucket found"}, 200
+    parser = reqparse.RequestParser()
+    parser.add_argument(
+        'bucket-name',
+        type=str,
+        required=True,
+        help="Please specify the name of the S3 bucket to create"
+    )
 
-    def post(self, bucket_name, location):
+    def post(self) -> dict:
+        """Return the details of a newly created S3 bucket by name or an error if it couldn't be created."""
 
-        if location not in regions:
-            return {"message": location + " is not a valid region"}
-
-        bucket = create_bucket(bucket_name, location)
-        if bucket:
-            return bucket
-        return {"message": "New bucket was not created successfully"}, 200
+        data = S3.parser.parse_args()
+        return create_bucket(data['bucket-name'])
 

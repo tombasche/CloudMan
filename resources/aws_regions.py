@@ -1,3 +1,7 @@
+
+"""
+Valid AWS Regions for the API according to http://docs.aws.amazon.com/general/latest/gr/rande.html#apigateway_region
+"""
 regions = [
     'us-east-2',
     'us-east-1',

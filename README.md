@@ -1,5 +1,5 @@
 # CloudMan
-Manage AWS cloud storage and instances using a simple API
+Manage tagged EC2 instances for environment tracking. Also comes with simple S3 functionality. 
 
 #Installation
 
@@ -15,7 +15,7 @@ In secrets.py fill in the blanks to authenticate with AWS
 API Spec
 ========
 
-### Create new instance - POST
+### Create new instance
 
 `<url>/ec2/create/<aws_region>` where aws_region might be ap-southeast-2, eu-west-1 etc.
 
@@ -24,19 +24,57 @@ Example of request to create a new Amazon Linux t2.micro with a _very_ basic web
 
 ```json
 {
-	"ami-image-id": "ami-10918173",
-	"instance-type": "t2.micro",
-	"key-name": "key-pair",
-	"tags": {
-		"config" : "dev"
-	},
-	"startup-script": "#!/bin/bash \nyum update -y \nyum install -y httpd \nservice httpd start \nchkconfig httpd on \necho '<html>this is a test</html>' > /var/www/html/index.html"
+    "ami-image-id": "ami-10918173",
+    "instance-type": "t2.micro",
+    "key-name": "key-pair",
+    "tags": {
+        "config" : "dev"
+    },
+    "startup-script": "#!/bin/bash \nyum update -y \nyum install -y httpd \nservice httpd start \nchkconfig httpd on \necho '<html>this is a test</html>' > /var/www/html/index.html"
 }
 ```
 
-The tags specified in this instance creation allow instances to be identified in order to be stopped, terminated or cloned via the API. These might be:
+The tags specified in this instance creation allow instances to be identified in order to be stopped, started or promoted to the next stage via the API. These might be:
 - dev
 - test
 - prod
 
-The idea here is that each tag specifies a certain config for a different environment. 
+### Promote instance
+
+A dev instance can be promoted to a test environment and a test environment to production with the following API call:
+
+`<url>/ec2/promote/<aws_region>` 
+As this is a post request it might look like so:
+```json
+{
+    "config-type-from" : "dev"
+}
+```
+Any instances with this tag will now be promoted to a `test` environment. An `instance-id` parameter can also be specified in this request to only promote a single instance.
+
+### Stop or start an instance
+
+Instances can be stopped or started by with the following endpoints:
+
+`<url>/ec2/stop|start/<aws_region>` 
+
+The body would be something like this:
+```json
+{
+    "config-type" : "dev"
+}
+```
+
+to stop all dev instances. Note that an instance must be fully stopped before it can be started again. 
+
+### Create an image
+
+Images can also be created from an instance to enable instances to be cloned with the following endpoint. (Note due to a limitation of t2.micro I'm unable to actually clone anything for free)
+
+`<url>/ec2/image/new/<aws_region`
+The request might look like this (note you'll need the exact instance-id)
+```json
+{
+    "instance-id": "i-03c977a9cfda8d629"
+}
+```
